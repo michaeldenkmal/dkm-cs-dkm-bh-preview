@@ -21,7 +21,8 @@ namespace dkm_cs_dkm_bh_preview
             return $"{year2Digit.ToString("00")}{mon.ToString("00")}{tag.ToString("00")}-{info}-{betrag.ToString("N2")}.pdf";
         }
 
-        public static void copyFileToErFolder(string pdfFullPath, DateTime belegDate, string info, decimal betrag, string outputErFolder, string origFileHandledFolder)
+        public static void copyFileToErFolder(string pdfFullPath, DateTime belegDate, string info, decimal betrag, string outputErFolder, string origFileHandledFolder,
+            string origFileFullName)
         {
             // zuerst neuen Dateinamen erzeugen
             string erFileName = buildErFileName(pdfFullPath, belegDate, info, betrag);
@@ -29,13 +30,23 @@ namespace dkm_cs_dkm_bh_preview
             string erDstFp = Path.Combine(outputErFolder, erFileName);
             try
             {
-                File.Copy(pdfFullPath, erDstFp);
+                File.Copy(pdfFullPath, erDstFp,overwrite:true);
             } catch (Exception ex)
             {
                 throw new Exception($"{ex.Message}: beim kopieren von @@{pdfFullPath}@@ nach @@{erDstFp}@@:{ex}");
             }
-            // pdfFilePath verschieben in ErledigtFolder
-            moveOrigFile(pdfFullPath, origFileHandledFolder);
+            // Originale Datei verschiebn
+            string fileName = Path.GetFileName(origFileFullName);
+            string dstFileName = Path.Combine(origFileHandledFolder, fileName);
+            if (!Directory.Exists(origFileHandledFolder))
+            {
+                Directory.CreateDirectory(origFileHandledFolder);
+            }
+            if (File.Exists(dstFileName))
+            {
+                File.Delete(dstFileName);
+            }
+            moveFile(origFileFullName, dstFileName);
         }
 
         public static void moveOrigFile(string fpOrig, string dstFolderPath)

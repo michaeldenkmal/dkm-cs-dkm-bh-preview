@@ -114,15 +114,25 @@ public static class MsgAttachmentHelper
 
         Directory.CreateDirectory(targetDir);
 
+        int fileCnt = 0;
+
         foreach (var attObj in message.Attachments)
         {
+            fileCnt++;
             // 1) Normale Datei-Anhänge
             if (attObj is Storage.Attachment fileAttachment)
             {
                 string fileName = fileAttachment.FileName;
+                string ext = Path.GetExtension(fileName);
 
                 if (string.IsNullOrWhiteSpace(fileName))
-                    fileName = "attachment_" + Guid.NewGuid().ToString("N");
+                {
+                    fileName = $"attach_{fileCnt}.attach";
+                } else
+                {
+                    fileName = $"attach_{fileCnt}{ext}";
+                }
+                    
 
                 string savePath = GetUniqueFilePath(Path.Combine(targetDir, fileName));
 
@@ -133,13 +143,13 @@ public static class MsgAttachmentHelper
             // 2) Eingebettete Mails (.msg)
             else if (attObj is Storage.Message embeddedMsg)
             {
-                string subject = embeddedMsg.Subject ?? "embedded_message";
-                subject = MakeSafeFilename(subject) + ".msg";
-
-                string savePath = GetUniqueFilePath(Path.Combine(targetDir, subject));
+                //string subject = embeddedMsg.Subject ?? "embedded_message";
+                //subject = MakeSafeFilename(subject) + ".msg";
+                string fileName = $"attach_{fileCnt}.msg";
+                string savePath = GetUniqueFilePath(Path.Combine(targetDir, fileName));
 
                 embeddedMsg.Save(savePath);
-                savedFiles.Add(new AttachmentInfo(subject, savePath));
+                savedFiles.Add(new AttachmentInfo(fileName, savePath));
             }
         }
 
@@ -151,7 +161,8 @@ public static class MsgAttachmentHelper
     {
         foreach (char c in Path.GetInvalidFileNameChars())
             s = s.Replace(c, '_');
-        return s;
+
+        return s.Replace(' ','_');
     }
 
     // Hilfsfunktion: unique filename erzeugen
@@ -182,11 +193,14 @@ public static class MsgAttachmentHelper
             throw new FileNotFoundException("MSG-Datei nicht gefunden", msgPath);
 
         // Zielordner für Attachments
-        string attachmentsBaseDir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-            "MsgAttachments");
+        //string attachmentsBaseDir = Path.Combine(
+        //    Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+        //    "MsgAttachments");
 
-        string msgFolderName = Path.GetFileNameWithoutExtension(msgPath);
+        string attachmentsBaseDir = Path.Combine(
+            Environment.GetEnvironmentVariable("TEMP"),
+            "MsgAttachments");
+        string msgFolderName = MakeSafeFilename(Path.GetFileNameWithoutExtension(msgPath));
         string attachmentDir = Path.Combine(attachmentsBaseDir, msgFolderName);
         Directory.CreateDirectory(attachmentDir);
 

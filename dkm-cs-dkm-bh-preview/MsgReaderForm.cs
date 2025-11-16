@@ -371,7 +371,7 @@ namespace dkm_cs_dkm_bh_preview
 
         private void log(string msg)
         {
-            edtLog.Lines.Append(msg);
+            edtLog.AppendText(msg + Environment.NewLine);
         }
 
         private void cleanInput()
@@ -407,7 +407,9 @@ namespace dkm_cs_dkm_bh_preview
                 }
                 CreMoveFileUtil.copyFileToErFolder(pdfFullPath: pdfFileList.Elem.PdfFp, belegDate: belegDate,
                     info: guidata.Info, betrag: betrag, outputErFolder: _opts.bhbaseData.OutputFolder, 
-                    origFileHandledFolder: _opts.bhbaseData.OrigFileHandledFolder);                
+                    origFileHandledFolder: _opts.bhbaseData.OrigFileHandledFolder,
+                    origFileFullName: pdfFileList.Elem.BhFileBaseInst.OrigFileName
+                    );                
                 pdfFileList.Elem.BhFileBaseInst.cleanUp();
                 handleBtnNext();
                 cleanInput();
@@ -430,6 +432,7 @@ namespace dkm_cs_dkm_bh_preview
 
         private void showPdfFile(string pdfFilePath)
         {
+            log("Zeige Pdf Datei: " + pdfFilePath);
             try
             {
                 // Lokale Datei als URI

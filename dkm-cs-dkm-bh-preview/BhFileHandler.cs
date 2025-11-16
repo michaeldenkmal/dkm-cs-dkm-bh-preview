@@ -31,6 +31,14 @@ namespace dkm_cs_dkm_bh_preview
 
         public abstract IEnumerable<string> GetPdfilePaths();
         public abstract void cleanUp();
+
+        public string OrigFileName
+        {
+            get
+            {
+                return _rootFullFilePath;
+            }
+        }
     }
 
     public class BhFilePdf : BhFileBase
