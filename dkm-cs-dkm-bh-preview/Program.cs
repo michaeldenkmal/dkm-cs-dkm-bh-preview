@@ -16,12 +16,18 @@ namespace dkm_cs_dkm_bh_preview
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
+
+            BhBaseData bhbase;
+
+            if (!BhBaseData.tryLoadYamlFile(out bhbase))
+            {
+                bhbase = BhBaseData.Create(
+                rootFolder: @"X:\bmd\ER\2025\09",
+                    belegYear: 2025, belegMon: 9);
+            }
             
             MsgReaderForm.Opts opts = new MsgReaderForm.Opts();
-            opts.bhbaseData = BhBaseData.Create(
-                rootFolder: @"D:\temp\er\09", 
-                    belegYear: 2025, belegMon: 9);
+            opts.bhbaseData = bhbase;
 
             Application.Run(new MsgReaderForm(opts));
             FileCleanUpHolder.GetInst().cleanUp();

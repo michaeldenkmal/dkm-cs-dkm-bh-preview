@@ -139,7 +139,7 @@ namespace dkm_cs_dkm_bh_preview
 
             public string getVal()
             {
-                return _form.edtMonat.Text;
+                return _form.edtJahr.Text;
             }
 
             public ValidateTextNumIntRule[] getValidateRules()
@@ -303,71 +303,8 @@ namespace dkm_cs_dkm_bh_preview
             edtMonat.Text = _opts.bhbaseData.BelegMon.ToString();
         }
 
-        private void BtnOpenMsg_Click(object sender, EventArgs e)
-        {
-            using (var ofd = new OpenFileDialog())
-            {
-                ofd.Filter = "Outlook MSG Dateien (*.msg)|*.msg|Alle Dateien (*.*)|*.*";
-                ofd.Title = "MSG-Datei auswählen";
 
-                if (ofd.ShowDialog(this) != DialogResult.OK)
-                    return;
 
-                var msgPath = ofd.FileName;
-
-                if (!File.Exists(msgPath))
-                {
-                    MessageBox.Show("Datei nicht gefunden:\r\n" + msgPath,
-                        "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                try
-                {
-                    //ReadMsgAndSaveAttachments(msgPath);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Fehler beim Lesen der MSG-Datei:\r\n" + ex,
-                        "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private static string MakeFileSystemSafeName(string name)
-        {
-            foreach (char c in Path.GetInvalidFileNameChars())
-                name = name.Replace(c, '_');
-
-            return string.IsNullOrWhiteSpace(name) ? "EmbeddedMessage" : name;
-        }
-
-        private static string Truncate(string text, int maxLen)
-        {
-            if (string.IsNullOrEmpty(text)) return "";
-            if (text.Length <= maxLen) return text;
-            return text.Substring(0, maxLen) + "\r\n... [gekürzt]";
-        }
-
-        private static string GetUniqueFilePath(string path)
-        {
-            if (!File.Exists(path))
-                return path;
-
-            string dir = Path.GetDirectoryName(path);
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            string ext = Path.GetExtension(path);
-
-            int counter = 1;
-            string newPath;
-            do
-            {
-                newPath = Path.Combine(dir, $"{fileName}_{counter}{ext}");
-                counter++;
-            } while (File.Exists(newPath));
-
-            return newPath;
-        }
 
         private void log(string msg)
         {
@@ -382,6 +319,7 @@ namespace dkm_cs_dkm_bh_preview
 
         private void btnExecute_Click(object sender, EventArgs e)
         {
+            saveBhBaseData();
             var guidata = guiToData();
             if (guidata.anyErrs())
             {
@@ -406,8 +344,8 @@ namespace dkm_cs_dkm_bh_preview
                     throw new Exception($"betrag is null");
                 }
                 CreMoveFileUtil.copyFileToErFolder(pdfFullPath: pdfFileList.Elem.PdfFp, belegDate: belegDate,
-                    info: guidata.Info, betrag: betrag, outputErFolder: _opts.bhbaseData.OutputFolder, 
-                    origFileHandledFolder: _opts.bhbaseData.OrigFileHandledFolder,
+                    info: guidata.Info, betrag: betrag, outputErFolder: _opts.bhbaseData.GetOutputFolder(), 
+                    origFileHandledFolder: _opts.bhbaseData.GetOrigFileHandledFolder(),
                     origFileFullName: pdfFileList.Elem.BhFileBaseInst.OrigFileName
                     );                
                 pdfFileList.Elem.BhFileBaseInst.cleanUp();
@@ -471,6 +409,7 @@ namespace dkm_cs_dkm_bh_preview
 
         private void btnReadBhFolder_Click(object sender, EventArgs e)
         {
+            saveBhBaseData();
             if (!Directory.Exists(edtBhRootFolder.Text))
             {
                 return;
@@ -484,6 +423,16 @@ namespace dkm_cs_dkm_bh_preview
             }
             this.pdfFileList = new ArrToCursor<BhFileHandler.PdfFileAndCleanUp>(lstpdffiles.ToArray());
             showPdfFile(this.pdfFileList.Elem.PdfFp);
+        }
+        void saveBhBaseData()
+        {
+            var guiData = guiToData();
+            BhBaseData bhbase = BhBaseData.Create(
+                rootFolder: edtBhRootFolder.Text,
+                belegYear: guiData.BelegYear.GetValueOrDefault(),
+                belegMon: guiData.BelegMon.GetValueOrDefault()
+                );
+            BhBaseData.saveToYaml(bhbase);
         }
 
         private void toolStripLabel1_Click(object sender, EventArgs e)
