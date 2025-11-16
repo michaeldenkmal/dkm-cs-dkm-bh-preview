@@ -10,6 +10,23 @@ namespace dkm_cs_dkm_bh_preview
     public static class CreMoveFileUtil
     {
 
+        public static void SetupSubDirsInBhFolder(string bhFolder)
+        {
+            string[] subdirs = new string[]
+            {
+                "upload","uploaded","erledigt"
+            };
+
+            foreach (var subdir in subdirs)
+            {
+                string fpfld = Path.Combine(bhFolder, subdir);
+                if (!Directory.Exists(fpfld))
+                {
+                    Directory.CreateDirectory(fpfld);
+                }
+            }
+
+        }
 
         public static string buildErFileName(string pdfFullPath, DateTime belegDate, string info, decimal betrag)
         {

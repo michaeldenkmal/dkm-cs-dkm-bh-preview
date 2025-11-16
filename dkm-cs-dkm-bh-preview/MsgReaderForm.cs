@@ -414,6 +414,9 @@ namespace dkm_cs_dkm_bh_preview
             {
                 return;
             }
+
+            CreMoveFileUtil.SetupSubDirsInBhFolder(edtBhRootFolder.Text);
+
             List<BhFileBase> bhFileBases = BhFileHandler.readBhRootFolder(edtBhRootFolder.Text);
             var itertator = BhFileHandler.buildPdfFileIterator(bhFileBases);
             List<BhFileHandler.PdfFileAndCleanUp> lstpdffiles = new List<BhFileHandler.PdfFileAndCleanUp>();
