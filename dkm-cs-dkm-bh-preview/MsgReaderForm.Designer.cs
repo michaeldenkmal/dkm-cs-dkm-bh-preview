@@ -34,6 +34,7 @@ namespace dkm_cs_dkm_bh_preview
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.edtLog = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnPrev = new System.Windows.Forms.ToolStripButton();
             this.btnNext = new System.Windows.Forms.ToolStripButton();
@@ -41,8 +42,7 @@ namespace dkm_cs_dkm_bh_preview
             this.edtJahr = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.edtMonat = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.edtBhRootFolder = new System.Windows.Forms.ToolStripTextBox();
+            this.edtBhRootFolder = new System.Windows.Forms.ToolStripComboBox();
             this.btnReadBhFolder = new System.Windows.Forms.ToolStripButton();
             this.pnlInputData = new System.Windows.Forms.Panel();
             this.btnExecute = new System.Windows.Forms.Button();
@@ -53,13 +53,20 @@ namespace dkm_cs_dkm_bh_preview
             this.errProvYear = new System.Windows.Forms.ErrorProvider(this.components);
             this.errProvMon = new System.Windows.Forms.ErrorProvider(this.components);
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.edtLog = new System.Windows.Forms.TextBox();
+            this.errProvBhRootFolder = new System.Windows.Forms.ErrorProvider(this.components);
+            this.errProvInfo = new System.Windows.Forms.ErrorProvider(this.components);
+            this.errProvBetrag = new System.Windows.Forms.ErrorProvider(this.components);
+            this.errProvBelegDate = new System.Windows.Forms.ErrorProvider(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.pnlInputData.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errProvYear)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.errProvMon)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvBhRootFolder)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvInfo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvBetrag)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvBelegDate)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -96,6 +103,17 @@ namespace dkm_cs_dkm_bh_preview
             this.tabPage2.Text = "tabPage2";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // edtLog
+            // 
+            this.edtLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.edtLog.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.edtLog.Location = new System.Drawing.Point(8, 6);
+            this.edtLog.Multiline = true;
+            this.edtLog.Name = "edtLog";
+            this.edtLog.Size = new System.Drawing.Size(776, 335);
+            this.edtLog.TabIndex = 0;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -105,7 +123,6 @@ namespace dkm_cs_dkm_bh_preview
             this.edtJahr,
             this.toolStripLabel3,
             this.edtMonat,
-            this.toolStripLabel1,
             this.edtBhRootFolder,
             this.btnReadBhFolder});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
@@ -158,18 +175,10 @@ namespace dkm_cs_dkm_bh_preview
             this.edtMonat.Name = "edtMonat";
             this.edtMonat.Size = new System.Drawing.Size(100, 25);
             // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(63, 22);
-            this.toolStripLabel1.Text = "Bh-Ordner";
-            this.toolStripLabel1.Click += new System.EventHandler(this.toolStripLabel1_Click);
-            // 
             // edtBhRootFolder
             // 
-            this.edtBhRootFolder.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.edtBhRootFolder.Name = "edtBhRootFolder";
-            this.edtBhRootFolder.Size = new System.Drawing.Size(100, 25);
+            this.edtBhRootFolder.Size = new System.Drawing.Size(300, 25);
             // 
             // btnReadBhFolder
             // 
@@ -247,16 +256,21 @@ namespace dkm_cs_dkm_bh_preview
             // 
             this.errProvMon.ContainerControl = this;
             // 
-            // edtLog
+            // errProvBhRootFolder
             // 
-            this.edtLog.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.edtLog.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.edtLog.Location = new System.Drawing.Point(8, 6);
-            this.edtLog.Multiline = true;
-            this.edtLog.Name = "edtLog";
-            this.edtLog.Size = new System.Drawing.Size(776, 335);
-            this.edtLog.TabIndex = 0;
+            this.errProvBhRootFolder.ContainerControl = this;
+            // 
+            // errProvInfo
+            // 
+            this.errProvInfo.ContainerControl = this;
+            // 
+            // errProvBetrag
+            // 
+            this.errProvBetrag.ContainerControl = this;
+            // 
+            // errProvBelegDate
+            // 
+            this.errProvBelegDate.ContainerControl = this;
             // 
             // MsgReaderForm
             // 
@@ -278,6 +292,10 @@ namespace dkm_cs_dkm_bh_preview
             this.pnlInputData.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errProvYear)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.errProvMon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvBhRootFolder)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvInfo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvBetrag)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.errProvBelegDate)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -303,10 +321,13 @@ namespace dkm_cs_dkm_bh_preview
         private System.Windows.Forms.ErrorProvider errProvMon;
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
         private System.Windows.Forms.ToolStripLabel toolStripLabel3;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
-        private System.Windows.Forms.ToolStripTextBox edtBhRootFolder;
         private System.Windows.Forms.ToolStripButton btnReadBhFolder;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.TextBox edtLog;
+        private System.Windows.Forms.ToolStripComboBox edtBhRootFolder;
+        private System.Windows.Forms.ErrorProvider errProvBhRootFolder;
+        private System.Windows.Forms.ErrorProvider errProvInfo;
+        private System.Windows.Forms.ErrorProvider errProvBetrag;
+        private System.Windows.Forms.ErrorProvider errProvBelegDate;
     }
 }

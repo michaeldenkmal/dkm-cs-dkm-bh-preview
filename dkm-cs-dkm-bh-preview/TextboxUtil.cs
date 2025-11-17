@@ -6,64 +6,115 @@ using System.Threading.Tasks;
 
 namespace dkm_cs_dkm_bh_preview
 {
-    public static class  TextboxUtil
+    public static class TextboxUtil
     {
-        public interface ValidateTextNumIntRule
-        {
-            bool validate(int value);
-            string formatErrorMsg(string szText);
 
+        public delegate bool TFN_ValidateTextNumIntRule_validate(int value);
+        public delegate string TFN_FormatErrorMsg(string szText);
+        public delegate void TFN_setErrorListInfo(List<string> errors);
+        
+        public class ValidateTextNumIntRule
+        {
+            public TFN_ValidateTextNumIntRule_validate FnValidate { get; private set; }
+            public TFN_FormatErrorMsg FnFormatErrorMsg { get; private set; }
+
+            private ValidateTextNumIntRule(TFN_ValidateTextNumIntRule_validate validate, TFN_FormatErrorMsg formatErrorMsg)
+            {
+                FnValidate = validate;
+                FnFormatErrorMsg = formatErrorMsg;
+            }
+            public static ValidateTextNumIntRule Create(TFN_ValidateTextNumIntRule_validate validate, TFN_FormatErrorMsg formatErrorMsg)
+            {
+                return new ValidateTextNumIntRule(validate, formatErrorMsg);
+            }
         }
 
-        public interface ValidateNumTextBoxOpts
+        public delegate string TFN_getStrVal();
+        
+
+        public static string formatErrList(List<string> errs)
         {
-            string getVal();
-            ValidateTextNumIntRule[] getValidateRules();
-
-            string getNumFormatErr(string strValue);
-
-            void setErrInfo(string errmsg);
-
-            void setIntVal(int? v);
+            return string.Join(";", errs);
         }
 
-        public class ValidateNumTextBoxRes
-        {
-            public int? newValue { get; set; }
-            public string Error { get; set; }
-        }
-
-        public  static void ValidateNumTextBox(ValidateNumTextBoxOpts opts)
+        public static int? ValidateNumTextBox(TFN_getStrVal fnGetVal, 
+            ValidateTextNumIntRule[] validationRules, TFN_FormatErrorMsg fnNumFormatErr,
+                TFN_setErrorListInfo fnSetErrInfo)
         {
             int mon;
-            if (int.TryParse(opts.getVal(), out mon))
+            List<string> errors = new List<string>();
+            string szTextboxValue = fnGetVal();
+            if (int.TryParse(szTextboxValue, out mon))
             {
-                bool errFound = false;
-                foreach (var valRule in opts.getValidateRules())
+                foreach (var valRule in validationRules)
                 {
-                    if (!valRule.validate(mon))
+                    if (!valRule.FnValidate(mon))
                     {
-                        errFound = true;
-                        string errmsg = valRule.formatErrorMsg(opts.getVal());
-                        opts.setErrInfo(errmsg);
+                        string errmsg = valRule.FnFormatErrorMsg(szTextboxValue);
+                        errors.Add(errmsg);
                     }
                 }
-                if (!errFound)
+                if (errors.Count==0)
                 {
-                    opts.setIntVal(mon);
-                } else
+                    return mon;
+                }
+                else
                 {
-                    opts.setIntVal(null);
+                    fnSetErrInfo(errors);
+                    return null;
                 }
             }
             else
             {
-                opts.setIntVal(null);
-                var errmsg = opts.getNumFormatErr(opts.getVal());
-                opts.setErrInfo(errmsg);
+                errors.Add(fnNumFormatErr(szTextboxValue));
+                fnSetErrInfo(errors);
+                return null;
             }
-
         }
 
+        public delegate bool TFN_validateTextBox(string v);
+
+        public class ValidateTextBoxRule
+        {
+            public TFN_validateTextBox FnValidate { get; set; }
+            public TFN_FormatErrorMsg FnFormatErrorMsg { get; private set; }
+
+            public static ValidateTextBoxRule Create(TFN_validateTextBox fnValidate, TFN_FormatErrorMsg fnFormatErrorMsg)
+            {
+                var ret = new ValidateTextBoxRule();
+                ret.FnValidate = fnValidate;
+                ret.FnFormatErrorMsg = fnFormatErrorMsg;
+                return ret;
+            }
+        }
+        
+        
+        public static string  ValidateTextBox(TFN_getStrVal fnGetStrVal,
+                TFN_setErrorListInfo fnSetErrInfo,
+                string valueOnErr,
+                ValidateTextBoxRule[] validationRules)
+        {
+            string textboxvalue = fnGetStrVal();
+            List<string> errors = new List<string>();
+            foreach (var valRule in validationRules)
+            {
+                if (!valRule.FnValidate(textboxvalue))
+                {
+                    string errmsg = valRule.FnFormatErrorMsg(textboxvalue);
+                    errors.Add(errmsg);
+                }
+            }
+            if (errors.Count >0)
+            {
+                fnSetErrInfo(errors);
+                return valueOnErr;
+            } else
+            {
+                return textboxvalue;
+            }
+        }
     }
+
+
 }
+

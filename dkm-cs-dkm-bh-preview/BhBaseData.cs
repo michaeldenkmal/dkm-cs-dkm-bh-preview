@@ -12,22 +12,57 @@ namespace dkm_cs_dkm_bh_preview
 {
     public class BhBaseData
     {
-        public string RootFolder { get; private set; }
-        public string GetOutputFolder() { 
-                return Path.Combine(RootFolder, "upload");         
+        public string BhRootFolder { get; private set; }
+        public static string getOutputFolder(string bhRootFolder) { 
+                return Path.Combine(bhRootFolder, "upload");         
         }
-        public string GetOrigFileHandledFolder() { 
-                return Path.Combine(RootFolder, "erledigt");            
+        public static string getOrigFileHandledFolder(string bhRootFolder) { 
+                return Path.Combine(bhRootFolder, "erledigt");            
+        }
+
+        private List<string> _lastbhFolders;
+        private List<string> ensureLastBhFolders()
+        {
+            if (_lastbhFolders==null)
+            {
+                _lastbhFolders = new List<string>();
+            }
+            return _lastbhFolders;
+        }
+        public string[] LastBhFolders
+        {
+            get
+            {
+                return ensureLastBhFolders().ToArray();
+            }
+            set
+            {
+                ensureLastBhFolders();
+                if (value == null)
+                {
+                    return;
+                }
+                _lastbhFolders.Clear();
+                _lastbhFolders.AddRange(value.ToList<string>());
+            }
+        }
+
+        public void addBhFolder(string bhFolder)
+        {
+            if (!ensureLastBhFolders().Exists(fld => string.Compare(fld, bhFolder,ignoreCase:true)==0))
+            {
+                _lastbhFolders.Add(bhFolder);
+            }
         }
 
         public int BelegYear { get; private set; }
         public int BelegMon { get; private set; }
 
 
-        public static BhBaseData Create(string rootFolder, int belegYear, int belegMon)
+        public static BhBaseData Create(string bhRootFolder, int belegYear, int belegMon)
         {
             var ret = new BhBaseData();
-            ret.RootFolder = rootFolder;
+            ret.BhRootFolder = bhRootFolder;
             ret.BelegYear = belegYear;
             ret.BelegMon = belegMon;
             return ret;

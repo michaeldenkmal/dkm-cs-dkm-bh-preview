@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 using MsgReader.Outlook;
+using static dkm_cs_dkm_bh_preview.FormUtil;
 using static dkm_cs_dkm_bh_preview.TextboxUtil;
 
 namespace dkm_cs_dkm_bh_preview
@@ -23,15 +24,48 @@ namespace dkm_cs_dkm_bh_preview
             public BhBaseData bhbaseData;
         }
 
-        private Opts _opts;
+        //private Opts _opts;
 
         public MsgReaderForm(Opts opts)
         {
-            this._opts = opts;
+            //this._opts = opts;
             InitializeComponent();
             InitializeControls();
+            applyOpts(opts);
         }
-        public class GuiData
+
+        private void applyOpts(Opts opts)
+        {
+            var guiData = new GuiData();
+            // Jahr
+            guiData.BelegYear = opts.bhbaseData.BelegYear;
+            // Monat
+            guiData.BelegMon = opts.bhbaseData.BelegMon;
+            // bhRootFolder
+            guiData.BhRootFolder = opts.bhbaseData.BhRootFolder;
+            // cbxLastRootFolders
+            guiData.LastBhRootFolders = opts.bhbaseData.LastBhFolders;
+            applyDataToGui(guiData);
+        }
+
+        public class GuiErrors
+        {
+            public string ErrBelegMon { get; set; }
+            public string ErrBelegYear { get; set; }
+            public string ErrBelegDate { get; set; }
+            public string ErrBhRootFolder { get; set; }
+            public string ErrBetrag { get; set; }
+            public string ErrInfo { get; set; }
+
+            public bool anyErrs()
+            {
+                string[] test = new string[] { ErrBelegDate, ErrBelegMon, ErrBelegYear, ErrBhRootFolder ,ErrBetrag, ErrInfo};
+                return test.ToList().Exists(p => !string.IsNullOrEmpty(p));
+            }
+
+        }
+
+        public class GuiData:GuiErrors
         {
 
             public string Info { get; set; }
@@ -39,138 +73,81 @@ namespace dkm_cs_dkm_bh_preview
             public Decimal? Betrag { get; set; }
             public int? BelegYear { get; set; }
             public int? BelegMon { get; set; }
+            public string BhRootFolder { get; set; }
+            public string[] LastBhRootFolders { get; set; }
 
-            public string ErrBelegMon { get; set; }
-            public string ErrBelegYear { get; set; }
-            public string ErrBelegDate { get; set; }
-
-            public bool anyErrs()
+            public ErrProvInfoRec[] buildErrProvInfoRecs(MsgReaderForm form)
             {
-                if (!string.IsNullOrEmpty(this.ErrBelegMon))
+                //   ErrInfo
+                return new ErrProvInfoRec[]
                 {
-                    return true;
-                }
-                if (!string.IsNullOrEmpty(this.ErrBelegYear))
-                {
-                    return true;
-                }
-                return false;
-            }
-
-        }
-
-        private class BelegmonValRule : ValidateTextNumIntRule
-        {
-
-            public string formatErrorMsg(string szText)
-            {
-                return $"{szText}:Monat muss zwischen 1-12 liegen";
-            }
-
-
-            public bool validate(int value)
-            {
-                return (value > 0) && (value < 13);
-            }
-        }
-
-        private class BelegMonValNumOpts : ValidateNumTextBoxOpts
-        {
-
-            private MsgReaderForm _form;
-            private GuiData _guiData;
-
-            public BelegMonValNumOpts(MsgReaderForm form, GuiData guiData)
-            {
-                this._form = form;
-                this._guiData = guiData;
-            }
-
-
-
-            public string getNumFormatErr(string strValue)
-            {
-                return $"{strValue} ist keine Zahl kein gültiger Monat";
-            }
-
-            public string getVal()
-            {
-                return _form.edtMonat.Text;
-            }
-
-            public ValidateTextNumIntRule[] getValidateRules()
-            {
-                return new ValidateTextNumIntRule[]
-                {
-                    new BelegmonValRule()
+                    ErrProvInfoRec.Create(fnGetErr: ()=> this.ErrBelegDate, theControl:form.dtpBelegDate, theErrorProvider: form.errProvBelegDate),
+                    ErrProvInfoRec.Create(fnGetErr: ()=> this.ErrBelegMon, theControl:form.edtMonat.TextBox, theErrorProvider: form.errProvMon),
+                    ErrProvInfoRec.Create(fnGetErr: ()=> this.ErrBelegYear, theControl:form.edtJahr.TextBox, theErrorProvider: form.errProvYear),
+                    ErrProvInfoRec.Create(fnGetErr: ()=> this.ErrBhRootFolder, theControl:form.edtBhRootFolder.ComboBox, theErrorProvider: form.errProvBhRootFolder),
+                    ErrProvInfoRec.Create(fnGetErr: ()=> this.ErrBetrag, theControl:form.edtBetrag, theErrorProvider: form.errProvBetrag),
+                    ErrProvInfoRec.Create(fnGetErr: ()=> this.ErrInfo, theControl:form.edtInfo, theErrorProvider: form.errProvInfo)
                 };
             }
-
-            public void setErrInfo(string errmsg)
-            {
-                _guiData.ErrBelegMon = errmsg;
-            }
-
-            public void setIntVal(int? v)
-            {
-                _guiData.BelegMon = v;
-            }
         }
-
-
-        private class BelegJahrValNumOpts : ValidateNumTextBoxOpts
-        {
-
-            private MsgReaderForm _form;
-            private GuiData _guiData;
-
-            public BelegJahrValNumOpts(MsgReaderForm form, GuiData guiData)
-            {
-                this._form = form;
-                this._guiData = guiData;
-            }
-
-
-
-            public string getNumFormatErr(string strValue)
-            {
-                return $"{strValue} ist keine Zahl kein gültiger Monat";
-            }
-
-            public string getVal()
-            {
-                return _form.edtJahr.Text;
-            }
-
-            public ValidateTextNumIntRule[] getValidateRules()
-            {
-                return new ValidateTextNumIntRule[]
-                {
-                };
-            }
-
-            public void setErrInfo(string errmsg)
-            {
-                _guiData.ErrBelegYear = errmsg;
-            }
-
-            public void setIntVal(int? v)
-            {
-                _guiData.BelegYear = v;
-            }
-        }
-
-
 
 
         private GuiData guiToData()
         {
             var ret = new GuiData();
             ret.BelegDate = dtpBelegDate.Value;
+            if (!ret.BelegDate.HasValue)
+            {
+                ret.ErrBelegDate = $"Belegdatum ist leer";
+            }
             ret.Info = edtInfo.Text;
+            if (string.IsNullOrEmpty(ret.Info))
+            {
+                ret.ErrInfo = "Info fehlt";
+            }
             ret.Betrag = edtBetrag.Value;
-            TextboxUtil.ValidateNumTextBox(new BelegMonValNumOpts(this, ret));
-            TextboxUtil.ValidateNumTextBox(new BelegJahrValNumOpts(this, ret));
+            if (!ret.Betrag.HasValue)
+            {
+                ret.ErrBetrag = "Belegbetrag ist leer";
+            }
+            // Monat
+            ret.BelegMon= TextboxUtil.ValidateNumTextBox(
+                fnGetVal: () => edtMonat.Text,
+                //ValidationRules = validationRules;
+                validationRules:  new ValidateTextNumIntRule[]{
+                    ValidateTextNumIntRule.Create
+                    (
+                    //TFN_ValidateTextNumIntRule_validate validate,  bool TFN_ValidateTextNumIntRule_validate(int value) 
+                    validate:(int value) => (value > 0) && (value < 13),
+                    //TFN_FormatErrorMsg formatErrorMsg) 
+                    formatErrorMsg: szText => $"{szText}:Monat muss zwischen 1-12 liegen"
+                    ) },
+                fnNumFormatErr: (strValue) => $"{strValue} ist keine Zahl, kein gültiger Monat",
+                fnSetErrInfo:(errors) => { ret.ErrBelegMon = string.Join(";", errors); }
+                );
+            //Jahr
+            ret.BelegYear= TextboxUtil.ValidateNumTextBox(
+                fnGetVal: () => edtJahr.Text,
+                //ValidationRules = validationRules;
+                validationRules: new ValidateTextNumIntRule[] { },
+                fnNumFormatErr: (strValue) => $"{strValue} ist keine Zahl",
+                fnSetErrInfo: (errmsgs) => { ret.ErrBelegYear = TextboxUtil.formatErrList(errmsgs); }                
+                );
+            // bhRootFolder
+            ret.BhRootFolder = TextboxUtil.ValidateTextBox(
+                fnGetStrVal: () => edtBhRootFolder.Text,
+                validationRules: new ValidateTextBoxRule[]
+                {
+                    ValidateTextBoxRule.Create(
+                        fnValidate:text=> Directory.Exists(text),
+                        fnFormatErrorMsg:text=> $"Ordner @@{text}@@ existiert nicht")
+                },
+                fnSetErrInfo:errs=> { ret.ErrBhRootFolder = TextboxUtil.formatErrList(errs); },
+                valueOnErr: ""
+                ) ;
+
+            var allOk =FormUtil.setErrProvByRec(ret.buildErrProvInfoRecs(this));
+
             return ret;
         }
 
@@ -202,11 +179,17 @@ namespace dkm_cs_dkm_bh_preview
             inGuiDataToForm = true;
             try
             {
-                dtpBelegDate.Value = guidata.BelegDate;
+                dtpBelegDate.Value = guidata.BelegDate.GetValueOrDefault(DateTime.Now);
                 edtInfo.Text = guidata.Info;
-                edtBetrag.Value = guidata.Betrag;
-                updateErrProvider(errProvMon, edtMonat.TextBox, guidata.ErrBelegMon);
-                updateErrProvider(errProvYear, edtJahr.TextBox, guidata.ErrBelegMon);
+                edtBetrag.Value = guidata.Betrag.GetValueOrDefault(0);
+                edtMonat.Text = guidata.BelegMon.GetValueOrDefault(0).ToString();
+                edtJahr.Text = guidata.BelegYear.GetValueOrDefault(0).ToString();
+                edtBhRootFolder.Text = guidata.BhRootFolder;
+                edtBhRootFolder.Items.Clear();
+                foreach (var folder in guidata.LastBhRootFolders)
+                {
+                    edtBhRootFolder.Items.Add(folder);
+                }
 
             }
             finally
@@ -241,12 +224,11 @@ namespace dkm_cs_dkm_bh_preview
         {
             initBetrag();
             initBelegDate();
-            initYearMon();
             initWebView();
-            initRootFolder();
             initTabOrder();
             InitializeWebView2Async();
         }
+
 
         private void initTabOrder()
         {
@@ -255,11 +237,11 @@ namespace dkm_cs_dkm_bh_preview
             });
         }
 
-        private void initRootFolder()
+        private void initRootFolder(string rootFolder)
         {
-            if (Directory.Exists(_opts.bhbaseData.RootFolder))
+            if (Directory.Exists(rootFolder))
             {
-                edtBhRootFolder.Text = _opts.bhbaseData.RootFolder;
+                edtBhRootFolder.Text = rootFolder;
             }
         }
 
@@ -297,10 +279,10 @@ namespace dkm_cs_dkm_bh_preview
             this.pnlInputData.Controls.Add(dtpBelegDate);
         }
 
-        private void initYearMon()
+        private void initYearMon(int year, int mon)
         {
-            edtJahr.Text = _opts.bhbaseData.BelegYear.ToString();
-            edtMonat.Text = _opts.bhbaseData.BelegMon.ToString();
+            edtJahr.Text = year.ToString();
+            edtMonat.Text = mon.ToString();
         }
 
 
@@ -331,7 +313,8 @@ namespace dkm_cs_dkm_bh_preview
                 if (guidata.BelegDate.HasValue)
                 {
                     belegDate = guidata.BelegDate.Value;
-                } else
+                }
+                else
                 {
                     throw new Exception($"belegDat ist null");
                 }
@@ -339,21 +322,25 @@ namespace dkm_cs_dkm_bh_preview
                 if (guidata.Betrag.HasValue)
                 {
                     betrag = guidata.Betrag.Value;
-                } else
+                }
+                else
                 {
                     throw new Exception($"betrag is null");
                 }
                 CreMoveFileUtil.copyFileToErFolder(pdfFullPath: pdfFileList.Elem.PdfFp, belegDate: belegDate,
-                    info: guidata.Info, betrag: betrag, outputErFolder: _opts.bhbaseData.GetOutputFolder(), 
-                    origFileHandledFolder: _opts.bhbaseData.GetOrigFileHandledFolder(),
+                    info: guidata.Info, betrag: betrag, 
+                    outputErFolder: BhBaseData.getOutputFolder(guidata.BhRootFolder),
+                    origFileHandledFolder:  BhBaseData.getOrigFileHandledFolder(guidata.BhRootFolder),
                     origFileFullName: pdfFileList.Elem.BhFileBaseInst.OrigFileName
-                    );                
+                    );
                 pdfFileList.Elem.BhFileBaseInst.cleanUp();
                 handleBtnNext();
                 cleanInput();
                 dtpBelegDate.Focus();
-                
-            } catch (Exception ex) {
+
+            }
+            catch (Exception ex)
+            {
                 log($"{ex.Message}: handling of file: {pdfFileList.Elem.PdfFp}:{ex}");
             }
 
@@ -409,6 +396,7 @@ namespace dkm_cs_dkm_bh_preview
 
         private void btnReadBhFolder_Click(object sender, EventArgs e)
         {
+            edtBhRootFolder_Validating();
             saveBhBaseData();
             if (!Directory.Exists(edtBhRootFolder.Text))
             {
@@ -425,28 +413,28 @@ namespace dkm_cs_dkm_bh_preview
                 lstpdffiles.Add(it);
             }
             this.pdfFileList = new ArrToCursor<BhFileHandler.PdfFileAndCleanUp>(lstpdffiles.ToArray());
-            showPdfFile(this.pdfFileList.Elem.PdfFp);
+            if (!pdfFileList.empty())
+            {
+                showPdfFile(this.pdfFileList.Elem.PdfFp);
+            }
         }
         void saveBhBaseData()
         {
             var guiData = guiToData();
             BhBaseData bhbase = BhBaseData.Create(
-                rootFolder: edtBhRootFolder.Text,
+                bhRootFolder: edtBhRootFolder.Text,
                 belegYear: guiData.BelegYear.GetValueOrDefault(),
                 belegMon: guiData.BelegMon.GetValueOrDefault()
                 );
+            foreach (var itm in edtBhRootFolder.Items)
+            {
+                string folder = itm as string;
+                bhbase.addBhFolder(folder);
+            }
             BhBaseData.saveToYaml(bhbase);
         }
 
-        private void toolStripLabel1_Click(object sender, EventArgs e)
-        {
-            var dlgres = folderBrowserDialog1.ShowDialog();
-            if (dlgres == DialogResult.OK)
-            {
-                edtBhRootFolder.Text = folderBrowserDialog1.SelectedPath;
-            }
-
-        }
+        
 
         private void btnPrev_Click(object sender, EventArgs e)
         {
@@ -464,12 +452,44 @@ namespace dkm_cs_dkm_bh_preview
                 this.pdfFileList.next();
                 showPdfFile(this.pdfFileList.Elem.PdfFp);
             }
-            
+
         }
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
             handleBtnNext();
+        }
+
+        private bool folderExistsInCbxItems(ComboBox cbx,string folder)
+        {
+            if (folder == null)
+            {
+                return false;
+            }
+            foreach (var item in cbx.Items)
+            {
+                var szItm = item as string;
+                if (string.Compare(folder, szItm,ignoreCase:true)==0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        private void edtBhRootFolder_Validating()
+        {
+            var cbx = edtBhRootFolder.ComboBox;
+            var newRootFolder = cbx.Text;
+            var exists= Directory.Exists(newRootFolder);
+            if (exists)
+            {
+                if (!folderExistsInCbxItems(cbx, newRootFolder))
+                {
+                    cbx.Items.Add(newRootFolder);
+                }
+            }
         }
     }
 }

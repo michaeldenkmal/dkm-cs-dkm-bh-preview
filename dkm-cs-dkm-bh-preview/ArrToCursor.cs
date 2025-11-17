@@ -12,6 +12,11 @@ namespace dkm_cs_dkm_bh_preview
 
         private T[] arr;
 
+        public bool empty()
+        {
+            return arr.Length == 0;
+        }
+
         public T Elem { get
             {
                 return this.arr[curIdx];

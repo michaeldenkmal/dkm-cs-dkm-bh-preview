@@ -22,7 +22,7 @@ namespace dkm_cs_dkm_bh_preview
             if (!BhBaseData.tryLoadYamlFile(out bhbase))
             {
                 bhbase = BhBaseData.Create(
-                rootFolder: @"X:\bmd\ER\2025\09",
+                bhRootFolder: @"X:\bmd\ER\2025\09",
                     belegYear: 2025, belegMon: 9);
             }
             
